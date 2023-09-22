@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"rss/internal/database"
+	"time"
 )
 
 type apiConfig struct {
@@ -36,8 +37,10 @@ func main() {
 	if err != nil {
 		log.Fatal("Cant connect to database", err)
 	}
-	apiCfg := apiConfig{DB: database.New(conn)}
+	db := database.New(conn)
+	apiCfg := apiConfig{DB: db}
 
+	go startScraping(db, 10, time.Minute)
 	router := chi.NewRouter()
 
 	router.Use(cors.Handler(cors.Options{
